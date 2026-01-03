@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:wysx/shared/widgets/location_search_input.dart';
 import '../../domain/entities/place.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 import '../providers/places_provider.dart';
 
 class CreatePlaceScreen extends ConsumerStatefulWidget {
@@ -38,8 +39,14 @@ class _CreatePlaceScreenState extends ConsumerState<CreatePlaceScreen> {
     });
 
     try {
-      // Mock location for now
-      final location = ref.read(currentLocationProvider) ?? const LatLng(0, 0);
+      // Mock location for now - using FutureProvider properly
+      final locationValue = await ref.read(currentLocationProvider.future);
+      final location = locationValue ?? const LatLng(0, 0);
+      final user = ref.read(currentUserProvider);
+
+      if (user == null) {
+        throw Exception('User must be logged in to create a place');
+      }
 
       final place = Place(
         id: const Uuid().v4(),
@@ -53,6 +60,7 @@ class _CreatePlaceScreenState extends ConsumerState<CreatePlaceScreen> {
             ? null
             : _addressController.text,
         isPublic: _isPublic,
+        createdBy: user.id,
         updatedAt: DateTime.now(),
         syncStatus: 'created',
       );

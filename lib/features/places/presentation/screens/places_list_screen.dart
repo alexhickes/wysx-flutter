@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../../../core/presentation/widgets/app_header.dart';
 import '../providers/places_provider.dart';
 import 'create_place_screen.dart';

@@ -68,18 +68,35 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       return;
     }
 
-    // Permissions granted: Try to get last known position first for speed
-    final lastKnownPosition = await Geolocator.getLastKnownPosition();
-    if (lastKnownPosition != null && mounted) {
-      _mapController.move(
-        LatLng(lastKnownPosition.latitude, lastKnownPosition.longitude),
-        15.0,
-      );
+    // Permissions granted: Try to get last known position first (fast)
+    try {
+      final lastKnownPosition = await Geolocator.getLastKnownPosition();
+      if (lastKnownPosition != null && mounted) {
+        _mapController.move(
+          LatLng(lastKnownPosition.latitude, lastKnownPosition.longitude),
+          15.0,
+        );
+      }
+    } catch (e) {
+      debugPrint('Error getting last known position: $e');
     }
 
     // Continue to get current precise position
+    // Use platform specific settings for better web support
     try {
-      final position = await Geolocator.getCurrentPosition();
+      // Define settings with a timeout
+      // Web might struggle with high accuracy if GPS is weak or on some browsers
+      // giving it a timeout ensures we don't hang forever
+      const locationSettings = LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 100,
+        timeLimit: Duration(seconds: 10),
+      );
+
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: locationSettings,
+      );
+
       if (mounted) {
         setState(() {
           _isLocationEnabled = true;
@@ -91,11 +108,16 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         );
       }
     } catch (e) {
-      debugPrint('Error getting location: $e');
+      debugPrint('Error getting current location: $e');
       if (mounted) {
         setState(() {
+          // If we fail (timeout or other), assume loading is done.
+          // We might stay at last known pos or default.
+          // Explicitly set location enabled to true if we have permission,
+          // so the "Location disabled" banner doesn't show up incorrectly
+          // just because fetch failed (unless it was a service disabled error, handled above).
+          // However, if we didn't get a location, maybe we should just stop loading.
           _isLoadingLocation = false;
-          // Keep existing location (e.g., last known or default)
         });
       }
     }

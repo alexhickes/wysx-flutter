@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:geolocator/geolocator.dart';
 import '../../domain/entities/place.dart';
 import '../../domain/entities/place_with_active_members.dart';
 import '../../domain/repositories/i_places_repository.dart';
@@ -96,3 +98,24 @@ final placeWithActiveMembersProvider =
       final repository = ref.watch(placesRepositoryProvider);
       return repository.getPlaceWithActiveMembers(placeId);
     });
+
+final currentLocationProvider = FutureProvider<LatLng?>((ref) async {
+  try {
+    // Check permission first (though MapScreen handles this usually)
+    final permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      return null;
+    }
+    final position = await Geolocator.getCurrentPosition();
+    return LatLng(position.latitude, position.longitude);
+  } catch (e) {
+    return null;
+  }
+});
+
+final nearbyPlacesProvider = FutureProvider<List<Place>>((ref) async {
+  // For now, just return all places.
+  // In a real app, we might filter by distance from currentLocationProvider
+  return ref.watch(allPlacesProvider.future);
+});
