@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'sidebar_navigation.dart';
 import '../../core/providers/location_provider.dart';
+import '../../features/places/presentation/providers/check_in_manager.dart';
 
 class ResponsiveShell extends ConsumerWidget {
   final StatefulNavigationShell navigationShell;
@@ -11,6 +12,9 @@ class ResponsiveShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Activate CheckInManager
+    ref.watch(checkInManagerProvider);
+
     final width = MediaQuery.of(context).size.width;
 
     final permissionStatus = ref.watch(locationPermissionProvider);

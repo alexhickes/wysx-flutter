@@ -91,4 +91,22 @@ class SupabasePlacesRepository {
 
     return result;
   }
+
+  Future<void> checkIn(String placeId, String userId) async {
+    // Check out from any other active check-ins first (optional cleanliness)
+    // For now, assuming server handles conflicts or we allow multiple (unlikely based on app type)
+    await _client.from('check_ins').insert({
+      'user_id': userId,
+      'place_id': placeId,
+      'checked_in_at': DateTime.now().toIso8601String(),
+    });
+  }
+
+  Future<void> checkOut(String placeId, String userId) async {
+    await _client
+        .from('check_ins')
+        .update({'checked_out_at': DateTime.now().toIso8601String()})
+        .match({'user_id': userId, 'place_id': placeId})
+        .isFilter('checked_out_at', null); // Only checkout active ones
+  }
 }

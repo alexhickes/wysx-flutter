@@ -23,4 +23,7 @@ abstract class IPlacesRepository {
     String userId,
   );
   Future<PlaceWithActiveMembers?> getPlaceWithActiveMembers(String placeId);
+
+  Future<void> checkIn(String placeId, String userId);
+  Future<void> checkOut(String placeId, String userId);
 }

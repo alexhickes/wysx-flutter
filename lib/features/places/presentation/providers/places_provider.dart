@@ -99,18 +99,26 @@ final placeWithActiveMembersProvider =
       return repository.getPlaceWithActiveMembers(placeId);
     });
 
-final currentLocationProvider = FutureProvider<LatLng?>((ref) async {
-  try {
-    // Check permission first (though MapScreen handles this usually)
-    final permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied ||
-        permission == LocationPermission.deniedForever) {
-      return null;
-    }
-    final position = await Geolocator.getCurrentPosition();
-    return LatLng(position.latitude, position.longitude);
-  } catch (e) {
-    return null;
+final currentLocationProvider = StreamProvider<LatLng?>((ref) async* {
+  // Check permission first
+  final permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied ||
+      permission == LocationPermission.deniedForever) {
+    yield null;
+    return;
+  }
+
+  // Define settings for better Web/Mobile performance
+  const locationSettings = LocationSettings(
+    accuracy: LocationAccuracy.high,
+    distanceFilter: 10, // Update every 10 meters
+  );
+
+  // Yield stream
+  await for (final position in Geolocator.getPositionStream(
+    locationSettings: locationSettings,
+  )) {
+    yield LatLng(position.latitude, position.longitude);
   }
 });
 

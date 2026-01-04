@@ -57,6 +57,38 @@ class WysxMap extends ConsumerWidget {
           loading: () => const MarkerLayer(markers: []),
           error: (_, __) => const MarkerLayer(markers: []),
         ),
+        // Blue Dot Current Location Layer
+        ref
+            .watch(currentLocationProvider)
+            .when(
+              data: (location) {
+                if (location == null) return const MarkerLayer(markers: []);
+                return MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: location,
+                      width: 20,
+                      height: 20,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 4,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+              loading: () => const MarkerLayer(markers: []),
+              error: (_, __) => const MarkerLayer(markers: []),
+            ),
       ],
     );
   }
