@@ -22,6 +22,7 @@ class PlacesTable extends Table {
   TextColumn get syncStatus => text().withDefault(
     const Constant('synced'),
   )(); // synced, created, updated, deleted
+  RealColumn get radius => real().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -124,7 +125,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration {
@@ -177,10 +178,16 @@ class AppDatabase extends _$AppDatabase {
           await m.addColumn(placesTable, placesTable.syncStatus);
         }
         if (from < 10) {
-          // Add notifications_enabled to group_members
           await m.addColumn(
             groupMembersTable,
             groupMembersTable.notificationsEnabled,
+          );
+        }
+        if (from < 11) {
+          // Add radius column to places table
+          await m.addColumn(
+            placesTable,
+            placesTable.radius as GeneratedColumn<Object>,
           );
         }
       },

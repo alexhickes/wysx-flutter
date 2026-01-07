@@ -128,6 +128,15 @@ class $PlacesTableTable extends PlacesTable
     requiredDuringInsert: false,
     defaultValue: const Constant('synced'),
   );
+  static const VerificationMeta _radiusMeta = const VerificationMeta('radius');
+  @override
+  late final GeneratedColumn<double> radius = GeneratedColumn<double>(
+    'radius',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -141,6 +150,7 @@ class $PlacesTableTable extends PlacesTable
     createdAt,
     updatedAt,
     syncStatus,
+    radius,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -228,6 +238,12 @@ class $PlacesTableTable extends PlacesTable
         syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
       );
     }
+    if (data.containsKey('radius')) {
+      context.handle(
+        _radiusMeta,
+        radius.isAcceptableOrUnknown(data['radius']!, _radiusMeta),
+      );
+    }
     return context;
   }
 
@@ -281,6 +297,10 @@ class $PlacesTableTable extends PlacesTable
         DriftSqlType.string,
         data['${effectivePrefix}sync_status'],
       )!,
+      radius: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}radius'],
+      ),
     );
   }
 
@@ -302,6 +322,7 @@ class PlacesTableData extends DataClass implements Insertable<PlacesTableData> {
   final DateTime createdAt;
   final DateTime updatedAt;
   final String syncStatus;
+  final double? radius;
   const PlacesTableData({
     required this.id,
     required this.name,
@@ -314,6 +335,7 @@ class PlacesTableData extends DataClass implements Insertable<PlacesTableData> {
     required this.createdAt,
     required this.updatedAt,
     required this.syncStatus,
+    this.radius,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -335,6 +357,9 @@ class PlacesTableData extends DataClass implements Insertable<PlacesTableData> {
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     map['sync_status'] = Variable<String>(syncStatus);
+    if (!nullToAbsent || radius != null) {
+      map['radius'] = Variable<double>(radius);
+    }
     return map;
   }
 
@@ -357,6 +382,9 @@ class PlacesTableData extends DataClass implements Insertable<PlacesTableData> {
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       syncStatus: Value(syncStatus),
+      radius: radius == null && nullToAbsent
+          ? const Value.absent()
+          : Value(radius),
     );
   }
 
@@ -377,6 +405,7 @@ class PlacesTableData extends DataClass implements Insertable<PlacesTableData> {
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       syncStatus: serializer.fromJson<String>(json['syncStatus']),
+      radius: serializer.fromJson<double?>(json['radius']),
     );
   }
   @override
@@ -394,6 +423,7 @@ class PlacesTableData extends DataClass implements Insertable<PlacesTableData> {
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'syncStatus': serializer.toJson<String>(syncStatus),
+      'radius': serializer.toJson<double?>(radius),
     };
   }
 
@@ -409,6 +439,7 @@ class PlacesTableData extends DataClass implements Insertable<PlacesTableData> {
     DateTime? createdAt,
     DateTime? updatedAt,
     String? syncStatus,
+    Value<double?> radius = const Value.absent(),
   }) => PlacesTableData(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -421,6 +452,7 @@ class PlacesTableData extends DataClass implements Insertable<PlacesTableData> {
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     syncStatus: syncStatus ?? this.syncStatus,
+    radius: radius.present ? radius.value : this.radius,
   );
   PlacesTableData copyWithCompanion(PlacesTableCompanion data) {
     return PlacesTableData(
@@ -439,6 +471,7 @@ class PlacesTableData extends DataClass implements Insertable<PlacesTableData> {
       syncStatus: data.syncStatus.present
           ? data.syncStatus.value
           : this.syncStatus,
+      radius: data.radius.present ? data.radius.value : this.radius,
     );
   }
 
@@ -455,7 +488,8 @@ class PlacesTableData extends DataClass implements Insertable<PlacesTableData> {
           ..write('createdBy: $createdBy, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
-          ..write('syncStatus: $syncStatus')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('radius: $radius')
           ..write(')'))
         .toString();
   }
@@ -473,6 +507,7 @@ class PlacesTableData extends DataClass implements Insertable<PlacesTableData> {
     createdAt,
     updatedAt,
     syncStatus,
+    radius,
   );
   @override
   bool operator ==(Object other) =>
@@ -488,7 +523,8 @@ class PlacesTableData extends DataClass implements Insertable<PlacesTableData> {
           other.createdBy == this.createdBy &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
-          other.syncStatus == this.syncStatus);
+          other.syncStatus == this.syncStatus &&
+          other.radius == this.radius);
 }
 
 class PlacesTableCompanion extends UpdateCompanion<PlacesTableData> {
@@ -503,6 +539,7 @@ class PlacesTableCompanion extends UpdateCompanion<PlacesTableData> {
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<String> syncStatus;
+  final Value<double?> radius;
   final Value<int> rowid;
   const PlacesTableCompanion({
     this.id = const Value.absent(),
@@ -516,6 +553,7 @@ class PlacesTableCompanion extends UpdateCompanion<PlacesTableData> {
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.syncStatus = const Value.absent(),
+    this.radius = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PlacesTableCompanion.insert({
@@ -530,6 +568,7 @@ class PlacesTableCompanion extends UpdateCompanion<PlacesTableData> {
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.syncStatus = const Value.absent(),
+    this.radius = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name),
@@ -547,6 +586,7 @@ class PlacesTableCompanion extends UpdateCompanion<PlacesTableData> {
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<String>? syncStatus,
+    Expression<double>? radius,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -561,6 +601,7 @@ class PlacesTableCompanion extends UpdateCompanion<PlacesTableData> {
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (syncStatus != null) 'sync_status': syncStatus,
+      if (radius != null) 'radius': radius,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -577,6 +618,7 @@ class PlacesTableCompanion extends UpdateCompanion<PlacesTableData> {
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<String>? syncStatus,
+    Value<double?>? radius,
     Value<int>? rowid,
   }) {
     return PlacesTableCompanion(
@@ -591,6 +633,7 @@ class PlacesTableCompanion extends UpdateCompanion<PlacesTableData> {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       syncStatus: syncStatus ?? this.syncStatus,
+      radius: radius ?? this.radius,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -631,6 +674,9 @@ class PlacesTableCompanion extends UpdateCompanion<PlacesTableData> {
     if (syncStatus.present) {
       map['sync_status'] = Variable<String>(syncStatus.value);
     }
+    if (radius.present) {
+      map['radius'] = Variable<double>(radius.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -651,6 +697,7 @@ class PlacesTableCompanion extends UpdateCompanion<PlacesTableData> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('syncStatus: $syncStatus, ')
+          ..write('radius: $radius, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2889,6 +2936,7 @@ typedef $$PlacesTableTableCreateCompanionBuilder =
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<String> syncStatus,
+      Value<double?> radius,
       Value<int> rowid,
     });
 typedef $$PlacesTableTableUpdateCompanionBuilder =
@@ -2904,6 +2952,7 @@ typedef $$PlacesTableTableUpdateCompanionBuilder =
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<String> syncStatus,
+      Value<double?> radius,
       Value<int> rowid,
     });
 
@@ -2999,6 +3048,11 @@ class $$PlacesTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<double> get radius => $composableBuilder(
+    column: $table.radius,
+    builder: (column) => ColumnFilters(column),
+  );
+
   Expression<bool> groupPlacesTableRefs(
     Expression<bool> Function($$GroupPlacesTableTableFilterComposer f) f,
   ) {
@@ -3088,6 +3142,11 @@ class $$PlacesTableTableOrderingComposer
     column: $table.syncStatus,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<double> get radius => $composableBuilder(
+    column: $table.radius,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$PlacesTableTableAnnotationComposer
@@ -3135,6 +3194,9 @@ class $$PlacesTableTableAnnotationComposer
     column: $table.syncStatus,
     builder: (column) => column,
   );
+
+  GeneratedColumn<double> get radius =>
+      $composableBuilder(column: $table.radius, builder: (column) => column);
 
   Expression<T> groupPlacesTableRefs<T extends Object>(
     Expression<T> Function($$GroupPlacesTableTableAnnotationComposer a) f,
@@ -3201,6 +3263,7 @@ class $$PlacesTableTableTableManager
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<String> syncStatus = const Value.absent(),
+                Value<double?> radius = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PlacesTableCompanion(
                 id: id,
@@ -3214,6 +3277,7 @@ class $$PlacesTableTableTableManager
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 syncStatus: syncStatus,
+                radius: radius,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3229,6 +3293,7 @@ class $$PlacesTableTableTableManager
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<String> syncStatus = const Value.absent(),
+                Value<double?> radius = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PlacesTableCompanion.insert(
                 id: id,
@@ -3242,6 +3307,7 @@ class $$PlacesTableTableTableManager
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 syncStatus: syncStatus,
+                radius: radius,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

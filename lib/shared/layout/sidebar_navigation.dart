@@ -41,7 +41,11 @@ class SidebarNavigation extends StatelessWidget {
             padding: const EdgeInsets.all(24.0),
             child: Row(
               children: [
-                Icon(Icons.location_on, color: AppColors.purple9, size: 32),
+                const Icon(
+                  Icons.location_on,
+                  color: AppColors.purple9,
+                  size: 32,
+                ),
                 const SizedBox(width: 12),
                 Text(
                   'WysX',

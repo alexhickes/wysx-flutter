@@ -7,7 +7,6 @@ import '../../places/presentation/widgets/create_place_sheet.dart';
 import 'tabs/friends_tab.dart';
 import 'tabs/groups_tab.dart';
 import 'tabs/places_tab.dart';
-import 'widgets/user_search_autocomplete.dart';
 
 class SocialScreen extends ConsumerStatefulWidget {
   const SocialScreen({super.key});
@@ -42,10 +41,7 @@ class _SocialScreenState extends ConsumerState<SocialScreen>
       body: Column(
         children: [
           // Search Bar
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: UserSearchAutocomplete(),
-          ),
+          // Search Bar removed from here
 
           // Tabs
           TabBar(

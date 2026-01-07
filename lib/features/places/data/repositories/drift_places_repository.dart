@@ -62,6 +62,7 @@ class DriftPlacesRepository implements IPlacesRepository {
             createdBy: Value(place.createdBy),
             updatedAt: Value(place.updatedAt),
             syncStatus: const Value('created'),
+            radius: Value(place.radius),
           ),
           mode: InsertMode.insertOrReplace,
         );
@@ -97,6 +98,7 @@ class DriftPlacesRepository implements IPlacesRepository {
         address: Value(place.address),
         updatedAt: Value(place.updatedAt),
         syncStatus: const Value('updated'),
+        radius: Value(place.radius),
       ),
     );
 
@@ -114,7 +116,7 @@ class DriftPlacesRepository implements IPlacesRepository {
 
   @override
   Future<List<Place>> getPlacesForUserGroups(String userId) async {
-    // 1. Get Place IDs first to avoid column ambiguity in join
+    // Join places, group_places, groups, group_members
     final query = _db.select(_db.placesTable).join([
       innerJoin(
         _db.groupPlacesTable,
@@ -132,24 +134,36 @@ class DriftPlacesRepository implements IPlacesRepository {
 
     query.where(_db.groupMembersTable.userId.equals(userId));
 
-    // Select only the ID to be safe
-    final rows = await query
-        .map((row) => row.readTable(_db.placesTable).id)
-        .get();
-    final placeIds = rows.toSet().toList();
+    final rows = await query.get();
 
-    if (placeIds.isEmpty) return [];
+    // Group results by Place ID to find max radius per place
+    final Map<String, Place> placesMap = {};
+    final Map<String, double> maxRadiusMap = {};
 
-    // 2. Fetch Place details in a clean query
-    final places = await (_db.select(
-      _db.placesTable,
-    )..where((tbl) => tbl.id.isIn(placeIds))).get();
+    for (final row in rows) {
+      final placeData = row.readTable(_db.placesTable);
+      final groupPlaceData = row.readTable(_db.groupPlacesTable);
 
-    for (final p in places) {
-      print('DEBUG: getPlacesForUserGroups fetched: ${p.id} -> ${p.name}');
+      // Store base place data if not already present
+      if (!placesMap.containsKey(placeData.id)) {
+        placesMap[placeData.id] = _mapRowToPlace(placeData);
+      }
+
+      // Calculate max radius: use group_places radius
+      // Note: radius in GroupPlacesTable is non-nullable with default 100.0
+      final radius = groupPlaceData.radius;
+      final currentMax = maxRadiusMap[placeData.id] ?? 0.0;
+      if (radius > currentMax) {
+        maxRadiusMap[placeData.id] = radius;
+      }
     }
 
-    return places.map((row) => _mapRowToPlace(row)).toList();
+    // Return places with the correctly assigned max radius
+    return placesMap.values.map((place) {
+      final maxRadius = maxRadiusMap[place.id];
+      // If we found a group radius, use it. Otherwise fall back to place's own radius.
+      return place.copyWith(radius: maxRadius ?? place.radius);
+    }).toList();
   }
 
   @override
@@ -285,6 +299,7 @@ class DriftPlacesRepository implements IPlacesRepository {
       createdBy: row.createdBy,
       updatedAt: row.updatedAt,
       syncStatus: row.syncStatus,
+      radius: row.radius,
     );
   }
 

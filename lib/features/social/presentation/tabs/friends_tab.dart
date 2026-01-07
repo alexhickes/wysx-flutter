@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/social_providers.dart';
 import '../widgets/friend_list_item.dart';
+import '../widgets/user_search_autocomplete.dart';
 
 class FriendsTab extends ConsumerWidget {
   const FriendsTab({super.key});
@@ -20,6 +21,12 @@ class FriendsTab extends ConsumerWidget {
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // Search Bar
+          const Padding(
+            padding: EdgeInsets.only(bottom: 16.0),
+            child: UserSearchAutocomplete(),
+          ),
+
           // Invites Section
           incomingAsync.when(
             data: (requests) {

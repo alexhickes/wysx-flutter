@@ -40,9 +40,9 @@ class WysxMap extends ConsumerWidget {
                     point: LatLng(pm.place.latitude, pm.place.longitude),
                     radius: pm.place.radius!,
                     useRadiusInMeter: true,
-                    color: AppColors.purple9.withOpacity(0.2),
+                    color: AppColors.purple9.withOpacity(0.15),
                     borderColor: AppColors.purple9,
-                    borderStrokeWidth: 2,
+                    borderStrokeWidth: 1,
                   ),
                 )
                 .toList(),

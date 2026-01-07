@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:latlong2/latlong.dart';
 import '../../../../core/presentation/widgets/app_header.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../groups/presentation/providers/groups_provider.dart';
 import '../providers/places_provider.dart';
 
@@ -243,6 +246,60 @@ class _PlaceDetailsContentState extends ConsumerState<PlaceDetailsContent> {
                 ),
               ),
               const SizedBox(height: 8),
+
+              // Map Preview
+              Container(
+                height: 200,
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey[300]!),
+                ),
+                child: FlutterMap(
+                  options: MapOptions(
+                    initialCenter: LatLng(place.latitude, place.longitude),
+                    initialZoom: 15.0,
+                    interactionOptions: const InteractionOptions(
+                      flags: InteractiveFlag.none,
+                    ),
+                  ),
+                  children: [
+                    TileLayer(
+                      urlTemplate:
+                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      userAgentPackageName: 'com.wysx.app',
+                    ),
+                    CircleLayer(
+                      circles: [
+                        if (place.radius != null)
+                          CircleMarker(
+                            point: LatLng(place.latitude, place.longitude),
+                            radius: place.radius!,
+                            useRadiusInMeter: true,
+                            color: AppColors.purple9.withOpacity(0.15),
+                            borderColor: AppColors.purple9,
+                            borderStrokeWidth: 1,
+                          ),
+                      ],
+                    ),
+                    MarkerLayer(
+                      markers: [
+                        Marker(
+                          point: LatLng(place.latitude, place.longitude),
+                          width: 40,
+                          height: 40,
+                          child: const Icon(
+                            Icons.location_on,
+                            color: AppColors.purple9,
+                            size: 40,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
 
               // Settings
               Container(

@@ -59,6 +59,38 @@ class Place extends Equatable {
     );
   }
 
+  Place copyWith({
+    String? id,
+    String? name,
+    double? latitude,
+    double? longitude,
+    PlaceStatus? status,
+    String? description,
+    String? address,
+    String? createdBy,
+    DateTime? updatedAt,
+    String? syncStatus,
+    double? radius,
+    String? placeType,
+    bool? isPublic,
+  }) {
+    return Place(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      status: status ?? this.status,
+      description: description ?? this.description,
+      address: address ?? this.address,
+      createdBy: createdBy ?? this.createdBy,
+      updatedAt: updatedAt ?? this.updatedAt,
+      syncStatus: syncStatus ?? this.syncStatus,
+      radius: radius ?? this.radius,
+      placeType: placeType ?? this.placeType,
+      isPublic: isPublic ?? this.isPublic,
+    );
+  }
+
   @override
   List<Object?> get props => [
     id,
