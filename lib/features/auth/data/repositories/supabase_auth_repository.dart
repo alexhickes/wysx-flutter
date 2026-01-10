@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import '../../domain/entities/auth_user.dart';
 import '../../domain/repositories/i_auth_repository.dart';
@@ -84,10 +85,11 @@ class SupabaseAuthRepository implements IAuthRepository {
 
   @override
   Future<void> sendPasswordResetEmail(String email) async {
-    await _client.auth.resetPasswordForEmail(
-      email,
-      redirectTo: 'io.supabase.wysx://auth/reset-password',
-    );
+    final redirectTo = kIsWeb
+        ? 'https://wysx-flutter.vercel.app/auth/reset-password'
+        : 'io.supabase.wysx://auth/reset-password';
+
+    await _client.auth.resetPasswordForEmail(email, redirectTo: redirectTo);
   }
 
   @override
