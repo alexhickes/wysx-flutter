@@ -57,6 +57,16 @@ class AccountScreen extends ConsumerWidget {
                 _buildSectionHeader(context, 'GPS Settings'),
                 _buildGpsToggle(context, ref, settings),
                 _buildPerformanceMode(context, ref, settings),
+                ListTile(
+                  leading: const Icon(Icons.logout, color: Colors.red),
+                  title: const Text(
+                    'Log Out',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                  onTap: () {
+                    ref.read(authRepositoryProvider).signOut();
+                  },
+                ),
                 const Divider(),
                 _buildSectionHeader(context, 'Privacy & Sharing'),
                 _buildGhostMode(context, ref, settings),
@@ -86,17 +96,6 @@ class AccountScreen extends ConsumerWidget {
                   onTap: () => sys_settings.AppSettings.openAppSettings(
                     type: sys_settings.AppSettingsType.location,
                   ),
-                ),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.logout, color: Colors.red),
-                  title: const Text(
-                    'Log Out',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                  onTap: () {
-                    ref.read(authRepositoryProvider).signOut();
-                  },
                 ),
                 const SizedBox(height: 50),
               ]),

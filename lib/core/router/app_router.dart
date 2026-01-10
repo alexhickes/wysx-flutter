@@ -3,6 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/auth/presentation/auth_screen.dart';
 import '../../features/auth/presentation/providers/auth_providers.dart';
+import '../../features/auth/presentation/reset_password/reset_password_screen.dart';
+import '../../features/auth/presentation/update_password/update_password_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show AuthChangeEvent;
 import '../../shared/layout/responsive_shell.dart';
 import '../../features/map/presentation/map_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
@@ -27,6 +30,7 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
+  final authEvents = ref.watch(authEventsProvider);
 
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
@@ -37,8 +41,17 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final isLoggedIn = authState.value != null;
       final isAuthRoute = state.uri.path == '/auth';
+      final isResetRoute =
+          state.uri.path == '/reset-password'; // The request page
+      final isUpdateRoute =
+          state.uri.path == '/auth/reset-password'; // The actual update page
 
-      if (!isLoggedIn && !isAuthRoute) {
+      // Handling password recovery flow
+      if (authEvents.value == AuthChangeEvent.passwordRecovery) {
+        return '/auth/reset-password';
+      }
+
+      if (!isLoggedIn && !isAuthRoute && !isResetRoute && !isUpdateRoute) {
         return '/auth';
       }
 
@@ -50,6 +63,14 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     },
     routes: [
       GoRoute(path: '/auth', builder: (context, state) => const AuthScreen()),
+      GoRoute(
+        path: '/reset-password',
+        builder: (context, state) => const ResetPasswordScreen(),
+      ),
+      GoRoute(
+        path: '/auth/reset-password',
+        builder: (context, state) => const UpdatePasswordScreen(),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return ResponsiveShell(navigationShell: navigationShell);

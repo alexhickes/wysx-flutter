@@ -1,3 +1,4 @@
+import 'package:supabase_flutter/supabase_flutter.dart' show AuthChangeEvent;
 import '../entities/auth_user.dart';
 
 abstract class IAuthRepository {
@@ -15,4 +16,10 @@ abstract class IAuthRepository {
   Future<void> signInWithFacebook();
   Future<void> signInWithApple(); // Usually standard for iOS
   Future<void> signOut();
+
+  Stream<AuthChangeEvent> get authEvents;
+
+  Future<void> sendPasswordResetEmail(String email);
+
+  Future<void> updatePassword(String password);
 }

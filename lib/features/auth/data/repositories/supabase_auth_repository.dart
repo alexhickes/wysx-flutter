@@ -54,8 +54,7 @@ class SupabaseAuthRepository implements IAuthRepository {
   Future<void> signInWithMagicLink(String email) async {
     await _client.auth.signInWithOtp(
       email: email,
-      emailRedirectTo:
-          'io.supabase.flutterquickstart://login-callback/', // TODO: Configure deep link
+      emailRedirectTo: 'io.supabase.wysx://login-callback/',
     );
   }
 
@@ -77,5 +76,22 @@ class SupabaseAuthRepository implements IAuthRepository {
   @override
   Future<void> signOut() async {
     await _client.auth.signOut();
+  }
+
+  @override
+  Stream<supabase.AuthChangeEvent> get authEvents =>
+      _client.auth.onAuthStateChange.map((event) => event.event);
+
+  @override
+  Future<void> sendPasswordResetEmail(String email) async {
+    await _client.auth.resetPasswordForEmail(
+      email,
+      redirectTo: 'io.supabase.wysx://auth/reset-password',
+    );
+  }
+
+  @override
+  Future<void> updatePassword(String password) async {
+    await _client.auth.updateUser(supabase.UserAttributes(password: password));
   }
 }

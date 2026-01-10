@@ -19,6 +19,10 @@ class SupabasePlacesRepository {
     });
   }
 
+  Future<void> updatePlace(String placeId, Map<String, dynamic> updates) async {
+    await _client.from('places').update(updates).eq('id', placeId);
+  }
+
   /// Fetch active members at each place
   /// Returns a map of place_id -> list of ActiveMember
   Future<Map<String, List<ActiveMember>>> fetchActiveMembersAtPlaces(

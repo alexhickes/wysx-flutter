@@ -188,6 +188,27 @@ class SupabaseGroupsRepository {
         .eq('place_id', placeId);
   }
 
+  Future<void> updateGroupPlace(
+    String groupId,
+    String placeId, {
+    double? radius,
+    String? description,
+    List<String>? placeType,
+  }) async {
+    final updates = <String, dynamic>{};
+    if (radius != null) updates['radius'] = radius.round();
+    if (description != null) updates['description'] = description;
+    if (placeType != null) updates['place_type'] = placeType;
+
+    if (updates.isEmpty) return;
+
+    await _client
+        .from('group_places')
+        .update(updates)
+        .eq('group_id', groupId)
+        .eq('place_id', placeId);
+  }
+
   Future<void> removeMemberFromGroup(String groupId, String userId) async {
     await _client
         .from('group_members')

@@ -51,6 +51,8 @@ class AppHeader extends ConsumerWidget implements PreferredSizeWidget {
                 onSelected: (value) {
                   if (value == 'profile' || value == 'gps') {
                     context.push('/account');
+                  } else if (value == 'logout') {
+                    ref.read(authRepositoryProvider).signOut();
                   }
                 },
                 itemBuilder: (context) => [
@@ -71,6 +73,16 @@ class AppHeader extends ConsumerWidget implements PreferredSizeWidget {
                         Icon(Icons.location_on, size: 20),
                         SizedBox(width: 12),
                         Text('GPS Settings'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'logout',
+                    child: Row(
+                      children: [
+                        Icon(Icons.logout, size: 20, color: Colors.red),
+                        SizedBox(width: 12),
+                        Text('Log Out', style: TextStyle(color: Colors.red)),
                       ],
                     ),
                   ),

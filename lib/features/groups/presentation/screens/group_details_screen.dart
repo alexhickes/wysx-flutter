@@ -9,6 +9,7 @@ import '../providers/groups_provider.dart';
 import '../widgets/add_place_sheet.dart';
 import '../widgets/create_visit_sheet.dart';
 import '../widgets/add_member_sheet.dart';
+import '../widgets/edit_group_place_sheet.dart';
 
 class GroupDetailsScreen extends ConsumerWidget {
   final String groupId;
@@ -89,24 +90,44 @@ class GroupDetailsScreen extends ConsumerWidget {
                                     '${placeData['radius']}m radius',
                                   ),
                                   trailing: isAdmin
-                                      ? IconButton(
-                                          icon: const Icon(Icons.delete),
-                                          onPressed: () async {
-                                            final client = ref.read(
-                                              supabaseClientProvider,
-                                            );
-                                            final repo =
-                                                SupabaseGroupsRepository(
-                                                  client,
+                                      ? Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(Icons.edit),
+                                              onPressed: () {
+                                                showModalBottomSheet(
+                                                  context: context,
+                                                  isScrollControlled: true,
+                                                  showDragHandle: true,
+                                                  builder: (context) =>
+                                                      EditGroupPlaceSheet(
+                                                        groupId: groupId,
+                                                        placeData: placeData,
+                                                      ),
                                                 );
-                                            await repo.removePlaceFromGroup(
-                                              groupId,
-                                              place['id'],
-                                            );
-                                            ref.invalidate(
-                                              groupPlacesProvider(groupId),
-                                            );
-                                          },
+                                              },
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(Icons.delete),
+                                              onPressed: () async {
+                                                final client = ref.read(
+                                                  supabaseClientProvider,
+                                                );
+                                                final repo =
+                                                    SupabaseGroupsRepository(
+                                                      client,
+                                                    );
+                                                await repo.removePlaceFromGroup(
+                                                  groupId,
+                                                  place['id'],
+                                                );
+                                                ref.invalidate(
+                                                  groupPlacesProvider(groupId),
+                                                );
+                                              },
+                                            ),
+                                          ],
                                         )
                                       : null,
                                   onTap: () {

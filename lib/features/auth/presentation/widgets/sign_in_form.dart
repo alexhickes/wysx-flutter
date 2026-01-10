@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../providers/auth_providers.dart';
 import 'social_login_row.dart';
@@ -75,7 +76,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
-              onPressed: () {}, // TODO: Implement Forgot Password
+              onPressed: () => context.push('/reset-password'),
               child: const Text('Forgot Password?'),
             ),
           ),
