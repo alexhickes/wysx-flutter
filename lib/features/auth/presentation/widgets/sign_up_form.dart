@@ -17,9 +17,19 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
 
   Future<void> _submit() async {
+    if (_passwordController.text != _confirmPasswordController.text) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
+      }
+      return;
+    }
+
     setState(() => _isLoading = true);
     try {
       await ref
@@ -76,6 +86,16 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
           obscureText: true,
           decoration: const InputDecoration(
             labelText: 'Password',
+            prefixIcon: Icon(Icons.lock_outlined),
+            border: OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: 16),
+        TextField(
+          controller: _confirmPasswordController,
+          obscureText: true,
+          decoration: const InputDecoration(
+            labelText: 'Confirm Password',
             prefixIcon: Icon(Icons.lock_outlined),
             border: OutlineInputBorder(),
           ),

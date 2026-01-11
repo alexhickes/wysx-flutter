@@ -136,6 +136,15 @@ class _LocationSearchInputState extends State<LocationSearchInput> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   ),
                 )
+              : _controller.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _controller.clear();
+                    _onSearchChanged('');
+                    widget.onPlaceSelected({}); // Clear selection callback
+                  },
+                )
               : null,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),

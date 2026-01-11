@@ -45,23 +45,29 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           state.uri.path == '/reset-password'; // The request page
       final isUpdateRoute =
           state.uri.path == '/auth/reset-password'; // The actual update page
+      final isConfirmRoute = state.uri.path == '/auth/confirm';
 
       // Handling password recovery flow
       if (authEvents.value == AuthChangeEvent.passwordRecovery) {
         return '/auth/reset-password';
       }
 
-      if (!isLoggedIn && !isAuthRoute && !isResetRoute && !isUpdateRoute) {
+      if (!isLoggedIn &&
+          !isAuthRoute &&
+          !isResetRoute &&
+          !isUpdateRoute &&
+          !isConfirmRoute) {
         return '/auth';
       }
 
-      if (isLoggedIn && isAuthRoute) {
+      if (isLoggedIn && (isAuthRoute || isConfirmRoute)) {
         return '/home';
       }
 
       return null;
     },
     routes: [
+      GoRoute(path: '/', redirect: (_, __) => '/home'),
       GoRoute(path: '/auth', builder: (context, state) => const AuthScreen()),
       GoRoute(
         path: '/reset-password',
@@ -70,6 +76,15 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/auth/reset-password',
         builder: (context, state) => const UpdatePasswordScreen(),
+      ),
+      GoRoute(
+        path: '/auth/confirm',
+        builder: (context, state) {
+          // Just a loading screen while Supabase handles the session
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        },
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {

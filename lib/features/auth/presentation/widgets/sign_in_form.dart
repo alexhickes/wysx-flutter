@@ -75,9 +75,18 @@ class _SignInFormState extends ConsumerState<SignInForm> {
           const SizedBox(height: 8),
           Align(
             alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () => context.push('/reset-password'),
-              child: const Text('Forgot Password?'),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextButton(
+                  onPressed: widget.onToggle,
+                  child: const Text('Create Account'),
+                ),
+                TextButton(
+                  onPressed: () => context.push('/reset-password'),
+                  child: const Text('Forgot Password?'),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 16),

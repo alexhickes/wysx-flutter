@@ -20,7 +20,10 @@ class _CreatePlaceSheetState extends ConsumerState<CreatePlaceSheet> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final _mapController = MapController();
+  final _tempNameController = TextEditingController();
   LatLng? _selectedLocation;
+  LatLng? _tempSelectedLocation;
   bool _isLoading = false;
   bool _showMap = false;
 
@@ -28,6 +31,8 @@ class _CreatePlaceSheetState extends ConsumerState<CreatePlaceSheet> {
   void dispose() {
     _nameController.dispose();
     _descriptionController.dispose();
+    _tempNameController.dispose();
+    _mapController.dispose();
     super.dispose();
   }
 
@@ -106,18 +111,6 @@ class _CreatePlaceSheetState extends ConsumerState<CreatePlaceSheet> {
               child: ListView(
                 padding: const EdgeInsets.all(16.0),
                 children: [
-                  LocationSearchInput(
-                    onPlaceSelected: (place) {
-                      final lat = double.tryParse(place['lat'].toString());
-                      final lon = double.tryParse(place['lon'].toString());
-                      if (lat != null && lon != null) {
-                        debugPrint('Selected location: $lat, $lon');
-                        debugPrint('Selected place: ${place['name']}');
-                        _nameController.text = place['name'];
-                        _selectedLocation = LatLng(lat, lon);
-                      }
-                    },
-                  ),
                   TextFormField(
                     controller: _nameController,
                     decoration: const InputDecoration(
@@ -143,7 +136,7 @@ class _CreatePlaceSheetState extends ConsumerState<CreatePlaceSheet> {
                   const SizedBox(height: 16),
 
                   // Location Selector
-                  if (_selectedLocation != null)
+                  if (_selectedLocation != null && !_showMap)
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -171,15 +164,22 @@ class _CreatePlaceSheetState extends ConsumerState<CreatePlaceSheet> {
                             ),
                           ),
                           TextButton(
-                            onPressed: () => setState(() => _showMap = true),
+                            onPressed: () => setState(() {
+                              _showMap = true;
+                              _tempSelectedLocation = _selectedLocation;
+                            }),
                             child: const Text('Change'),
                           ),
                         ],
                       ),
                     )
-                  else
+                  else if (!_showMap)
                     ElevatedButton.icon(
-                      onPressed: () => setState(() => _showMap = true),
+                      onPressed: () => setState(() {
+                        _showMap = true;
+                        // Trigger logic to center on user if _selectedLocation is null handled in onMapReady
+                        _tempSelectedLocation = _selectedLocation;
+                      }),
                       icon: const Icon(Icons.map),
                       label: const Text('Pick on Map'),
                       style: ElevatedButton.styleFrom(
@@ -190,24 +190,34 @@ class _CreatePlaceSheetState extends ConsumerState<CreatePlaceSheet> {
                   if (_showMap) ...[
                     const SizedBox(height: 16),
                     SizedBox(
-                      height: 300,
+                      height: 450,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(12),
                         child: Stack(
                           children: [
                             FlutterMap(
+                              mapController: _mapController,
                               options: MapOptions(
-                                initialCenter: const LatLng(
-                                  51.505,
-                                  -0.09,
-                                ), // Default London
+                                initialCenter:
+                                    _selectedLocation ??
+                                    const LatLng(51.505, -0.09),
                                 initialZoom: 13.0,
                                 onTap: (tapPosition, point) {
                                   setState(() {
-                                    _selectedLocation = point;
-                                    _showMap =
-                                        false; // Close map after selection
+                                    _tempSelectedLocation = point;
                                   });
+                                },
+                                onMapReady: () {
+                                  if (_selectedLocation == null) {
+                                    // Optional: Center on user location if not already selected
+                                    ref
+                                        .read(currentLocationProvider.future)
+                                        .then((location) {
+                                          if (location != null && mounted) {
+                                            _mapController.move(location, 13.0);
+                                          }
+                                        });
+                                  }
                                 },
                               ),
                               children: [
@@ -216,11 +226,11 @@ class _CreatePlaceSheetState extends ConsumerState<CreatePlaceSheet> {
                                       'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                                   userAgentPackageName: 'com.wysx.app',
                                 ),
-                                if (_selectedLocation != null)
+                                if (_tempSelectedLocation != null)
                                   MarkerLayer(
                                     markers: [
                                       Marker(
-                                        point: _selectedLocation!,
+                                        point: _tempSelectedLocation!,
                                         width: 40,
                                         height: 40,
                                         child: const Icon(
@@ -233,28 +243,82 @@ class _CreatePlaceSheetState extends ConsumerState<CreatePlaceSheet> {
                                   ),
                               ],
                             ),
+                            // Search Bar
                             Positioned(
-                              top: 8,
-                              right: 8,
-                              child: IconButton(
-                                onPressed: () =>
-                                    setState(() => _showMap = false),
-                                icon: const Icon(Icons.close),
-                                style: IconButton.styleFrom(
-                                  backgroundColor: Colors.white,
+                              top: 16,
+                              left: 16,
+                              right: 16,
+                              child: LocationSearchInput(
+                                onPlaceSelected: (place) {
+                                  final lat = double.tryParse(
+                                    place['lat'].toString(),
+                                  );
+                                  final lon = double.tryParse(
+                                    place['lon'].toString(),
+                                  );
+                                  if (lat != null && lon != null) {
+                                    final point = LatLng(lat, lon);
+                                    _mapController.move(point, 15.0);
+                                    setState(() {
+                                      _tempSelectedLocation = point;
+                                      // Update main controller if user confirms later
+                                      _tempNameController.text =
+                                          place['name'] ?? '';
+                                    });
+                                  }
+                                },
+                              ),
+                            ),
+                            // Cancel Button (Bottom Left)
+                            Positioned(
+                              bottom: 16,
+                              left: 16,
+                              child: FloatingActionButton(
+                                heroTag: 'cancel_map',
+                                onPressed: () => setState(() {
+                                  _showMap = false;
+                                  _tempSelectedLocation = null;
+                                }),
+                                backgroundColor: Colors.white,
+                                mini: true,
+                                child: const Icon(
+                                  Icons.close,
+                                  color: Colors.black,
                                 ),
                               ),
                             ),
-                            const Positioned(
-                              bottom: 8,
-                              left: 0,
-                              right: 0,
-                              child: Center(
-                                child: Card(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Text('Tap to select location'),
-                                  ),
+                            // Confirm Button (Bottom Right)
+                            Positioned(
+                              bottom: 16,
+                              right: 16,
+                              child: FloatingActionButton(
+                                heroTag: 'confirm_map',
+                                onPressed: () {
+                                  if (_tempSelectedLocation != null) {
+                                    setState(() {
+                                      _selectedLocation = _tempSelectedLocation;
+                                      if (_tempNameController.text.isNotEmpty &&
+                                          _nameController.text.isEmpty) {
+                                        _nameController.text =
+                                            _tempNameController.text;
+                                      }
+                                      _showMap = false;
+                                    });
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Please select a location',
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                                backgroundColor: Colors.black,
+                                mini: true,
+                                child: const Icon(
+                                  Icons.check,
+                                  color: Colors.white,
                                 ),
                               ),
                             ),
