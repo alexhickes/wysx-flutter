@@ -44,10 +44,15 @@ class SupabaseAuthRepository implements IAuthRepository {
     String password,
     String username,
   ) async {
+    final redirectTo = kIsWeb
+        ? 'https://wysx-flutter.vercel.app/auth/confirm'
+        : 'io.supabase.wysx://auth/confirm';
+
     await _client.auth.signUp(
       email: email,
       password: password,
       data: {'username': username},
+      emailRedirectTo: redirectTo,
     );
   }
 

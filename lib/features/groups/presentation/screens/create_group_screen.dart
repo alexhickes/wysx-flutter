@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../places/presentation/providers/places_provider.dart';
 
 import 'package:uuid/uuid.dart';
 import '../../domain/entities/group.dart';
@@ -96,6 +97,8 @@ class _CreateGroupFormState extends ConsumerState<CreateGroupForm> {
 
       // Refresh the list
       ref.invalidate(myGroupsProvider);
+      ref.invalidate(invitedPlacesProvider);
+      ref.invalidate(myPlacesProvider);
 
       if (mounted) {
         Navigator.of(context).pop();

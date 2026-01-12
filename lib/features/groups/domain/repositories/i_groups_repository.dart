@@ -31,4 +31,11 @@ abstract class IGroupsRepository {
   Future<void> leaveGroup(String groupId, String userId);
   Future<List<Group>> getGroupsForPlace(String placeId);
   Future<List<PlannedVisit>> getPlannedVisitsForPlace(String placeId);
+  Future<void> updateGroupPlace(
+    String groupId,
+    String placeId, {
+    double? radius,
+    String? description,
+    List<String>? placeType,
+  });
 }

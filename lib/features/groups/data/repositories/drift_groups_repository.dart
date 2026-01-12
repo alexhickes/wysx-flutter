@@ -290,6 +290,46 @@ class DriftGroupsRepository implements IGroupsRepository {
     }
   }
 
+  @override
+  Future<void> updateGroupPlace(
+    String groupId,
+    String placeId, {
+    double? radius,
+    String? description,
+    List<String>? placeType,
+  }) async {
+    // 1. Update local DB
+    await (_db.update(_db.groupPlacesTable)
+          ..where((t) => t.groupId.equals(groupId) & t.placeId.equals(placeId)))
+        .write(
+          GroupPlacesTableCompanion(
+            radius: radius == null ? const Value.absent() : Value(radius),
+            description: description == null
+                ? const Value.absent()
+                : Value(description),
+            placeType: placeType == null
+                ? const Value.absent()
+                : Value(placeType.join(',')),
+          ),
+        );
+
+    // 2. Sync to Supabase
+    if (_supabaseRepository != null) {
+      try {
+        await _supabaseRepository.updateGroupPlace(
+          groupId,
+          placeId,
+          radius: radius,
+          description: description,
+          placeType: placeType,
+        );
+      } catch (e) {
+        print('Error syncing group place update: $e');
+        // We still keep the local update, essentially "optimistic UI"
+      }
+    }
+  }
+
   Future<void> syncGroups(String userId) async {
     if (_supabaseRepository == null) return;
 

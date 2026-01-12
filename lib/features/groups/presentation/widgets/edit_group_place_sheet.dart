@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:wysx/features/groups/data/repositories/supabase_groups_repository.dart';
+
 import 'package:wysx/features/places/data/repositories/supabase_places_repository.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../providers/groups_provider.dart';
@@ -70,7 +70,7 @@ class _EditGroupPlaceSheetState extends ConsumerState<EditGroupPlaceSheet> {
 
     try {
       final client = ref.read(supabaseClientProvider);
-      final groupsRepo = SupabaseGroupsRepository(client);
+      final groupsRepo = ref.read(groupsRepositoryProvider);
       final placesRepo = SupabasePlacesRepository(client);
 
       final place = widget.placeData['places'];

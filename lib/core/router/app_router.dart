@@ -6,6 +6,7 @@ import '../../features/auth/presentation/providers/auth_providers.dart';
 import '../../features/auth/presentation/reset_password/reset_password_screen.dart';
 import '../../features/auth/presentation/update_password/update_password_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show AuthChangeEvent;
+import '../../features/auth/presentation/email_confirmation_screen.dart';
 import '../../shared/layout/responsive_shell.dart';
 import '../../features/map/presentation/map_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
@@ -80,10 +81,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/auth/confirm',
         builder: (context, state) {
-          // Just a loading screen while Supabase handles the session
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
+          return const EmailConfirmationScreen();
         },
       ),
       StatefulShellRoute.indexedStack(
