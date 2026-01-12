@@ -19,6 +19,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
   final _passwordController = TextEditingController();
   bool _isMagicLink = false;
   bool _isLoading = false;
+  bool _isPasswordVisible = false;
 
   Future<void> _submit() async {
     setState(() => _isLoading = true);
@@ -65,18 +66,31 @@ class _SignInFormState extends ConsumerState<SignInForm> {
         if (!_isMagicLink) ...[
           TextField(
             controller: _passwordController,
-            obscureText: true,
-            decoration: const InputDecoration(
+            obscureText: !_isPasswordVisible,
+            decoration: InputDecoration(
               labelText: 'Password',
-              prefixIcon: Icon(Icons.lock_outlined),
-              border: OutlineInputBorder(),
+              prefixIcon: const Icon(Icons.lock_outlined),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _isPasswordVisible = !_isPasswordVisible;
+                  });
+                },
+              ),
+              border: const OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: 8),
           Align(
             alignment: Alignment.centerRight,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
+            child: Wrap(
+              alignment: WrapAlignment.end,
+              spacing: 8.0, // Gap between items
+              runSpacing: 4.0, // Gap between lines
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 TextButton(
                   onPressed: widget.onToggle,
