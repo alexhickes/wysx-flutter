@@ -97,8 +97,9 @@ class SupabasePlacesRepository {
   }
 
   Future<void> checkIn(String placeId, String userId) async {
-    // Check out from any other active check-ins first (optional cleanliness)
-    // For now, assuming server handles conflicts or we allow multiple (unlikely based on app type)
+    // Force checkout of all other active places first
+    await checkOutAllActive(userId);
+
     await _client.from('check_ins').insert({
       'user_id': userId,
       'place_id': placeId,
@@ -112,5 +113,27 @@ class SupabasePlacesRepository {
         .update({'checked_out_at': DateTime.now().toIso8601String()})
         .match({'user_id': userId, 'place_id': placeId})
         .isFilter('checked_out_at', null); // Only checkout active ones
+  }
+
+  Future<void> checkOutAllActive(String userId) async {
+    await _client
+        .from('check_ins')
+        .update({'checked_out_at': DateTime.now().toIso8601String()})
+        .eq('user_id', userId)
+        .isFilter('checked_out_at', null);
+  }
+
+  Future<String?> getActiveCheckIn(String userId) async {
+    final response = await _client
+        .from('check_ins')
+        .select('place_id, checked_in_at')
+        .eq('user_id', userId)
+        .isFilter('checked_out_at', null)
+        .order('checked_in_at', ascending: false)
+        .limit(1);
+
+    final data = response as List<dynamic>;
+    if (data.isEmpty) return null;
+    return data.first['place_id'] as String?;
   }
 }

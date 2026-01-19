@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/theme/app_colors.dart';
 
 import 'sign_in_form.dart';
 import 'sign_up_form.dart';
@@ -43,7 +42,12 @@ class _AuthModalState extends ConsumerState<AuthModal> {
         mainAxisSize: MainAxisSize.min,
         children: [
           // Logo
-          const Icon(Icons.location_on, size: 48, color: AppColors.purple9),
+          Image.asset(
+            'assets/images/logo-app.png',
+            width: 80,
+            height: 80,
+            fit: BoxFit.contain,
+          ),
           const SizedBox(height: 16),
           Text(
             'Wys X',

@@ -44,7 +44,7 @@ class SupabaseAuthRepository implements IAuthRepository {
     String password,
     String username,
   ) async {
-    final redirectTo = kIsWeb
+    const redirectTo = kIsWeb
         ? 'https://wysx-flutter.vercel.app/auth/confirm'
         : 'io.supabase.wysx://auth/confirm';
 
@@ -90,7 +90,7 @@ class SupabaseAuthRepository implements IAuthRepository {
 
   @override
   Future<void> sendPasswordResetEmail(String email) async {
-    final redirectTo = kIsWeb
+    const redirectTo = kIsWeb
         ? 'https://wysx-flutter.vercel.app/auth/reset-password'
         : 'io.supabase.wysx://auth/reset-password';
 

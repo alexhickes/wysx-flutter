@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../domain/entities/place.dart';
+import '../../../home/presentation/providers/home_providers.dart';
 import 'places_provider.dart';
 
 final checkInManagerProvider = Provider<CheckInManager>((ref) {
@@ -28,6 +29,27 @@ class CheckInManager {
         error: (_, __) {},
       );
     });
+
+    // Restore state from DB in case we restarted app while checked in
+    _restoreState();
+  }
+
+  Future<void> _restoreState() async {
+    final user = _ref.read(currentUserProvider);
+    if (user == null) return;
+
+    final repository = _ref.read(placesRepositoryProvider);
+    try {
+      final activePlaceId = await repository.getActiveCheckIn(user.id);
+      if (activePlaceId != null) {
+        _lastCheckedInPlaceId = activePlaceId;
+        print(
+          'CheckInManager: Restored check-in state for place $activePlaceId',
+        );
+      }
+    } catch (e) {
+      print('CheckInManager: Failed to restore state: $e');
+    }
   }
 
   Future<void> _checkLocation(LatLng currentLocation) async {
@@ -84,13 +106,16 @@ class CheckInManager {
         );
         await repository.checkIn(insidePlace.id, user.id);
         _lastCheckedInPlaceId = insidePlace.id;
+        _ref.invalidate(myActiveCheckInsProvider);
       }
     } else {
       // We are not in any place.
       if (_lastCheckedInPlaceId != null) {
-        print('CheckInManager: Left place, triggering CheckOut');
-        await repository.checkOut(_lastCheckedInPlaceId!, user.id);
+        print('CheckInManager: Left place, triggering CheckOutAllActive');
+        // Force cleanup of all check-ins to fix any potential multiple check-in issues
+        await repository.checkOutAllActive(user.id);
         _lastCheckedInPlaceId = null;
+        _ref.invalidate(myActiveCheckInsProvider);
       }
     }
   }

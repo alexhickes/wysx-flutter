@@ -6,8 +6,13 @@ import '../../../../features/places/domain/entities/place.dart';
 
 class ActiveCheckInCard extends StatelessWidget {
   final CheckIn checkIn;
+  final List<CheckIn> friendsHere;
 
-  const ActiveCheckInCard({super.key, required this.checkIn});
+  const ActiveCheckInCard({
+    super.key,
+    required this.checkIn,
+    this.friendsHere = const [],
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -81,8 +86,58 @@ class ActiveCheckInCard extends StatelessWidget {
                 ],
               ],
             ),
+            if (friendsHere.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              const Divider(height: 1),
+              const SizedBox(height: 12),
+              Text(
+                'Friends also here',
+                style: TextStyle(
+                  color: Colors.grey[800],
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 8),
+              ...friendsHere.map((friend) => _buildFriendRow(friend)),
+            ],
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildFriendRow(CheckIn friend) {
+    final user = friend.user;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 12,
+            backgroundImage: user?.avatarUrl != null
+                ? NetworkImage(user!.avatarUrl!)
+                : null,
+            child: user?.avatarUrl == null
+                ? Text(
+                    (user?.displayName ?? user?.username ?? '?')[0]
+                        .toUpperCase(),
+                    style: const TextStyle(fontSize: 10),
+                  )
+                : null,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            user?.displayName ?? user?.username ?? 'Unknown',
+            style: const TextStyle(fontSize: 13),
+          ),
+          const SizedBox(width: 8),
+          if (friend.activity != null)
+            Text(
+              '${friend.activity?.icon ?? ""} ${friend.activity?.name}',
+              style: TextStyle(color: Colors.grey[600], fontSize: 12),
+            ),
+        ],
       ),
     );
   }

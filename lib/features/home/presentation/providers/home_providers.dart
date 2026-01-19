@@ -10,22 +10,22 @@ final homeRepositoryProvider = Provider<IHomeRepository>((ref) {
   return SupabaseHomeRepository(client);
 });
 
-final myActiveCheckInsProvider = FutureProvider.autoDispose<List<CheckIn>>((
+final myActiveCheckInsProvider = StreamProvider.autoDispose<List<CheckIn>>((
   ref,
-) async {
+) {
   final user = ref.watch(currentUserProvider);
-  if (user == null) return [];
+  if (user == null) return const Stream.empty();
   final repository = ref.watch(homeRepositoryProvider);
-  return repository.getMyActiveCheckIns(user.id);
+  return repository.getMyActiveCheckInsStream(user.id);
 });
 
-final friendsCheckInsProvider = FutureProvider.autoDispose<List<CheckIn>>((
+final friendsCheckInsProvider = StreamProvider.autoDispose<List<CheckIn>>((
   ref,
-) async {
+) {
   final user = ref.watch(currentUserProvider);
-  if (user == null) return [];
+  if (user == null) return const Stream.empty();
   final repository = ref.watch(homeRepositoryProvider);
-  return repository.getFriendsActiveCheckIns(user.id);
+  return repository.getFriendsActiveCheckInsStream(user.id);
 });
 
 final upcomingVisitsProvider = FutureProvider.autoDispose<List<PlannedVisit>>((

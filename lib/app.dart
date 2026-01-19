@@ -5,12 +5,16 @@ import 'core/theme/app_theme.dart';
 import 'core/providers/location_provider.dart';
 
 import 'features/settings/presentation/providers/settings_providers.dart';
+import 'features/places/presentation/providers/check_in_manager.dart';
 
 class WysxApp extends ConsumerWidget {
   const WysxApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Initialize CheckInManager globally to monitor location changes
+    ref.watch(checkInManagerProvider);
+
     final router = ref.watch(goRouterProvider);
     final themeMode = ref.watch(themeModeProvider);
 

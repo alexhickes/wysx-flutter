@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import '../../../../features/groups/domain/entities/group.dart';
 import '../../../../features/groups/domain/entities/planned_visit.dart';
@@ -30,6 +31,42 @@ class SupabaseHomeRepository implements IHomeRepository {
   }
 
   @override
+  Stream<List<CheckIn>> getMyActiveCheckInsStream(String userId) {
+    final controller = StreamController<List<CheckIn>>();
+
+    // Initial fetch
+    getMyActiveCheckIns(userId).then((data) {
+      if (!controller.isClosed) controller.add(data);
+    });
+
+    // Subscribe to changes
+    final subscription = _client
+        .channel('public:check_ins:my_active:$userId')
+        .onPostgresChanges(
+          event: supabase.PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'check_ins',
+          filter: supabase.PostgresChangeFilter(
+            type: supabase.PostgresChangeFilterType.eq,
+            column: 'user_id',
+            value: userId,
+          ),
+          callback: (payload) async {
+            final data = await getMyActiveCheckIns(userId);
+            if (!controller.isClosed) controller.add(data);
+          },
+        )
+        .subscribe();
+
+    controller.onCancel = () async {
+      await _client.removeChannel(subscription);
+      await controller.close();
+    };
+
+    return controller.stream;
+  }
+
+  @override
   Future<List<CheckIn>> getFriendsActiveCheckIns(String userId) async {
     // First get friends list (simplified for now, ideally use a view or RPC)
     // Assuming 'my_friends' view exists as per svelte code
@@ -56,6 +93,57 @@ class SupabaseHomeRepository implements IHomeRepository {
         .order('checked_in_at', ascending: false);
 
     return (response as List).map((json) => _mapCheckIn(json)).toList();
+  }
+
+  @override
+  Stream<List<CheckIn>> getFriendsActiveCheckInsStream(String userId) async* {
+    // First get friend IDs
+    final friendsResponse = await _client
+        .from('my_friends')
+        .select('friend_id');
+    final friendIds = (friendsResponse as List)
+        .map((f) => f['friend_id'] as String)
+        .toList();
+
+    if (friendIds.isEmpty) {
+      yield [];
+      return;
+    }
+
+    final controller = StreamController<List<CheckIn>>();
+
+    // Initial fetch
+    getFriendsActiveCheckIns(userId).then((data) {
+      if (!controller.isClosed) controller.add(data);
+    });
+
+    // Subscribe to changes
+    final subscription = _client
+        .channel('public:check_ins:friends:$userId')
+        .onPostgresChanges(
+          event: supabase.PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'check_ins',
+          callback: (payload) async {
+            final record = payload.newRecord.isNotEmpty
+                ? payload.newRecord
+                : payload.oldRecord;
+            final recordUserId = record['user_id'] as String?;
+
+            if (recordUserId != null && friendIds.contains(recordUserId)) {
+              final data = await getFriendsActiveCheckIns(userId);
+              if (!controller.isClosed) controller.add(data);
+            }
+          },
+        )
+        .subscribe();
+
+    controller.onCancel = () async {
+      await _client.removeChannel(subscription);
+      await controller.close();
+    };
+
+    yield* controller.stream;
   }
 
   @override

@@ -318,4 +318,20 @@ class DriftPlacesRepository implements IPlacesRepository {
       await _supabaseRepository.checkOut(placeId, userId);
     }
   }
+
+  @override
+  Future<String?> getActiveCheckIn(String userId) async {
+    // Only support online check for now
+    if (_supabaseRepository != null) {
+      return _supabaseRepository.getActiveCheckIn(userId);
+    }
+    return null;
+  }
+
+  @override
+  Future<void> checkOutAllActive(String userId) async {
+    if (_supabaseRepository != null) {
+      await _supabaseRepository.checkOutAllActive(userId);
+    }
+  }
 }

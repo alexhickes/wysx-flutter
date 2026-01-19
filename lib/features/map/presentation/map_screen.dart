@@ -7,6 +7,7 @@ import 'widgets/wysx_map.dart';
 import '../../../shared/widgets/location_search_input.dart';
 
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
+import '../../places/presentation/providers/places_provider.dart';
 
 import '../../../core/presentation/widgets/app_header.dart';
 
@@ -189,42 +190,65 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'map_fab',
-        onPressed: () {
-          WoltModalSheet.show(
-            context: context,
-            pageListBuilder: (modalSheetContext) {
-              return [
-                WoltModalSheetPage(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Places',
-                          style: Theme.of(context).textTheme.headlineMedium,
-                        ),
-                        const SizedBox(height: 16),
-                        const Text('List of nearby places will appear here.'),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: () {
-                            // TODO: Implement stacked navigation using correct API
-                            debugPrint('View Details pressed');
-                          },
-                          child: const Text('View Details (Stack Example)'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ];
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            heroTag: 'map_current_location_fab',
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.black87,
+            mini: true,
+            onPressed: () {
+              ref.read(currentLocationProvider).whenData((location) {
+                if (location != null) {
+                  _mapController.move(location, 15.0);
+                }
+              });
             },
-          );
-        },
-        child: const Icon(Icons.list),
+            child: const Icon(Icons.my_location),
+          ),
+          const SizedBox(height: 16),
+          FloatingActionButton(
+            heroTag: 'map_fab',
+            onPressed: () {
+              WoltModalSheet.show(
+                context: context,
+                pageListBuilder: (modalSheetContext) {
+                  return [
+                    WoltModalSheetPage(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Places',
+                              style: Theme.of(context).textTheme.headlineMedium,
+                            ),
+                            const SizedBox(height: 16),
+                            const Text(
+                              'List of nearby places will appear here.',
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () {
+                                // TODO: Implement stacked navigation using correct API
+                                debugPrint('View Details pressed');
+                              },
+                              child: const Text('View Details (Stack Example)'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ];
+                },
+              );
+            },
+            child: const Icon(Icons.list),
+          ),
+        ],
       ),
     );
   }

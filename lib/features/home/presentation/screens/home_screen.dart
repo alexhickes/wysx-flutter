@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/presentation/widgets/app_header.dart';
 import '../../../../features/places/domain/entities/place.dart';
 import '../../domain/entities/check_in.dart';
+import '../../../../features/places/presentation/providers/places_provider.dart';
 import '../providers/home_providers.dart';
 import '../widgets/home_widgets.dart';
 
@@ -35,6 +36,10 @@ class HomeScreen extends ConsumerWidget {
             activeCheckInsAsync.when(
               data: (checkIns) {
                 if (checkIns.isEmpty) return const SizedBox.shrink();
+
+                // Get friends data if available
+                final friendsCheckIns = friendsCheckInsAsync.valueOrNull ?? [];
+
                 return Container(
                   color: Theme.of(context).scaffoldBackgroundColor,
                   padding: const EdgeInsets.symmetric(
@@ -45,9 +50,23 @@ class HomeScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildSectionHeader(context, 'Currently at'),
+                      Row(
+                        children: [
+                          _buildSectionHeader(context, 'Currently at'),
+                          const SizedBox(width: 8),
+                          const _LocationLoadingBadge(),
+                        ],
+                      ),
                       const SizedBox(height: 8),
-                      ...checkIns.map((c) => ActiveCheckInCard(checkIn: c)),
+                      ...checkIns.map((c) {
+                        final friendsHere = friendsCheckIns
+                            .where((f) => f.placeId == c.placeId)
+                            .toList();
+                        return ActiveCheckInCard(
+                          checkIn: c,
+                          friendsHere: friendsHere,
+                        );
+                      }),
                     ],
                   ),
                 );
@@ -264,6 +283,69 @@ class HomeScreen extends ConsumerWidget {
         'Error loading section: $error',
         style: const TextStyle(color: Colors.red),
       ),
+    );
+  }
+}
+
+class _LocationLoadingBadge extends ConsumerStatefulWidget {
+  const _LocationLoadingBadge();
+
+  @override
+  ConsumerState<_LocationLoadingBadge> createState() =>
+      _LocationLoadingBadgeState();
+}
+
+class _LocationLoadingBadgeState extends ConsumerState<_LocationLoadingBadge>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final locationAsync = ref.watch(currentLocationProvider);
+
+    return locationAsync.maybeWhen(
+      loading: () => FadeTransition(
+        opacity: _controller,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+            color: Colors.amber.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: Colors.amber),
+          ),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.location_searching, size: 10, color: Colors.amber),
+              SizedBox(width: 4),
+              Text(
+                'LOCATING...',
+                style: TextStyle(
+                  color: Colors.amber,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      orElse: () => const SizedBox.shrink(),
     );
   }
 }
