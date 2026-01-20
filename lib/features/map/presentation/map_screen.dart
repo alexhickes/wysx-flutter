@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'widgets/wysx_map.dart';
+import 'widgets/map_places_list.dart';
 import '../../../shared/widgets/location_search_input.dart';
 
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
@@ -215,34 +216,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               WoltModalSheet.show(
                 context: context,
                 pageListBuilder: (modalSheetContext) {
-                  return [
-                    WoltModalSheetPage(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Places',
-                              style: Theme.of(context).textTheme.headlineMedium,
-                            ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'List of nearby places will appear here.',
-                            ),
-                            const SizedBox(height: 16),
-                            ElevatedButton(
-                              onPressed: () {
-                                // TODO: Implement stacked navigation using correct API
-                                debugPrint('View Details pressed');
-                              },
-                              child: const Text('View Details (Stack Example)'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ];
+                  return [WoltModalSheetPage(child: const MapPlacesList())];
                 },
               );
             },
