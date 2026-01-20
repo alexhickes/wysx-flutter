@@ -7,6 +7,7 @@ import 'package:latlong2/latlong.dart';
 import '../../../../core/presentation/widgets/app_header.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../groups/presentation/providers/groups_provider.dart';
+import '../widgets/create_visit_for_place_sheet.dart';
 import '../providers/places_provider.dart';
 
 class PlaceDetailsScreen extends ConsumerWidget {
@@ -155,10 +156,28 @@ class _PlaceDetailsContentState extends ConsumerState<PlaceDetailsContent> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSectionHeader(
-                      context,
-                      'Planned Visits',
-                      visitsAsync.valueOrNull?.length.toString(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildSectionHeader(
+                          context,
+                          'Planned Visits',
+                          visitsAsync.valueOrNull?.length.toString(),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.add),
+                          onPressed: () {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              builder: (context) => CreateVisitForPlaceSheet(
+                                placeId: widget.placeId,
+                                placeName: place.name,
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                     visitsAsync.when(
                       data: (visits) {

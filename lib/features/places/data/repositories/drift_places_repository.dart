@@ -218,11 +218,16 @@ class DriftPlacesRepository implements IPlacesRepository {
         print('DEBUG: Place $k has ${v.length} active members');
       });
 
+      final upcomingVisitsMap = await _supabaseRepository
+          .fetchUpcomingVisitCounts(placeIds);
+
       return places.map((place) {
         final activeMembers = activeMembersMap[place.id] ?? [];
+        final visitCount = upcomingVisitsMap[place.id] ?? 0;
         return PlaceWithActiveMembers(
           place: place,
           activeMembers: activeMembers,
+          upcomingVisitCount: visitCount,
         );
       }).toList();
     } catch (e) {
@@ -273,11 +278,20 @@ class DriftPlacesRepository implements IPlacesRepository {
           .fetchActiveMembersAtPlaces([placeId]);
 
       final activeMembers = activeMembersMap[placeId] ?? [];
+
+      final upcomingVisitsMap = await _supabaseRepository
+          .fetchUpcomingVisitCounts([placeId]);
+      final visitCount = upcomingVisitsMap[placeId] ?? 0;
+
       print(
-        'DEBUG: Single place fetch result: ${activeMembers.length} active members',
+        'DEBUG: Single place fetch result: ${activeMembers.length} active members, $visitCount visits',
       );
 
-      return PlaceWithActiveMembers(place: place, activeMembers: activeMembers);
+      return PlaceWithActiveMembers(
+        place: place,
+        activeMembers: activeMembers,
+        upcomingVisitCount: visitCount,
+      );
     } catch (e) {
       print('Error fetching active members for place $placeId: $e');
       return PlaceWithActiveMembers(place: place, activeMembers: const []);

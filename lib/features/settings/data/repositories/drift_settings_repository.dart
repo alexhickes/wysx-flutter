@@ -10,7 +10,12 @@ class DriftSettingsRepository implements ISettingsRepository {
 
   @override
   Stream<AppSettings> get settingsStream {
-    return _db.select(_db.settingsTable).watchSingle().map(_toEntity);
+    return _db.select(_db.settingsTable).watchSingleOrNull().map((data) {
+      if (data == null) {
+        return const AppSettings();
+      }
+      return _toEntity(data);
+    });
   }
 
   @override

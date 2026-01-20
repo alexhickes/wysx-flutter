@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../auth/presentation/providers/auth_providers.dart';
 import '../../settings/domain/entities/app_settings.dart';
 import '../../settings/presentation/providers/settings_providers.dart';
+import '../../auth/domain/entities/auth_user.dart';
 
 import '../../../core/presentation/widgets/app_header.dart';
 
@@ -54,24 +55,16 @@ class AccountScreen extends ConsumerWidget {
                 _buildSectionHeader(context, 'Appearance'),
                 _buildThemeOption(context, ref, settings),
                 const Divider(),
-                _buildSectionHeader(context, 'GPS Settings'),
-                _buildGpsToggle(context, ref, settings),
-                _buildPerformanceMode(context, ref, settings),
-                ListTile(
-                  leading: const Icon(Icons.logout, color: Colors.red),
-                  title: const Text(
-                    'Log Out',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                  onTap: () {
-                    ref.read(authRepositoryProvider).signOut();
-                  },
-                ),
+
+                _buildSectionHeader(context, 'Account'),
+                _buildAvatarItem(context, ref, user),
+
                 const Divider(),
                 _buildSectionHeader(context, 'Privacy & Sharing'),
                 _buildGhostMode(context, ref, settings),
                 const Divider(),
                 _buildSectionHeader(context, 'System'),
+                _buildGpsSettingsItem(context, ref, settings),
                 ListTile(
                   leading: const Icon(Icons.settings_applications),
                   title: const Text('App Settings'),
@@ -96,6 +89,17 @@ class AccountScreen extends ConsumerWidget {
                   onTap: () => sys_settings.AppSettings.openAppSettings(
                     type: sys_settings.AppSettingsType.location,
                   ),
+                ),
+                const SizedBox(height: 50),
+                ListTile(
+                  leading: const Icon(Icons.logout, color: Colors.red),
+                  title: const Text(
+                    'Log Out',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                  onTap: () {
+                    ref.read(authRepositoryProvider).signOut();
+                  },
                 ),
                 const SizedBox(height: 50),
               ]),
@@ -163,6 +167,63 @@ class AccountScreen extends ConsumerWidget {
       value: settings.gpsEnabled,
       onChanged: (value) {
         ref.read(settingsRepositoryProvider).updateGpsEnabled(value);
+      },
+    );
+  }
+
+  Widget _buildAvatarItem(BuildContext context, WidgetRef ref, AuthUser? user) {
+    return ListTile(
+      leading: const Icon(Icons.person),
+      title: const Text('Avatar'),
+      subtitle: const Text('Change your profile picture'),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () {
+        // TODO: Implement avatar change functionality
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Avatar change coming soon!')),
+        );
+      },
+    );
+  }
+
+  Widget _buildGpsSettingsItem(
+    BuildContext context,
+    WidgetRef ref,
+    AppSettings settings,
+  ) {
+    return ListTile(
+      leading: const Icon(Icons.gps_fixed),
+      title: const Text('GPS Settings'),
+      subtitle: const Text('Accuracy, Battery settings'),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          builder: (context) {
+            return Consumer(
+              builder: (context, ref, child) {
+                // Re-watch settings inside sheet to react to changes
+                final currentSettings =
+                    ref.watch(settingsProvider).valueOrNull ?? settings;
+
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 16),
+                    Text(
+                      'GPS Settings',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildGpsToggle(context, ref, currentSettings),
+                    _buildPerformanceMode(context, ref, currentSettings),
+                    const SizedBox(height: 32),
+                  ],
+                );
+              },
+            );
+          },
+        );
       },
     );
   }

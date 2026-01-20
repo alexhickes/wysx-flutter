@@ -38,10 +38,12 @@ class ActiveMember extends Equatable {
 class PlaceWithActiveMembers extends Equatable {
   final Place place;
   final List<ActiveMember> activeMembers;
+  final int upcomingVisitCount;
 
   const PlaceWithActiveMembers({
     required this.place,
     required this.activeMembers,
+    this.upcomingVisitCount = 0,
   });
 
   /// Returns the count of active members
@@ -60,6 +62,13 @@ class PlaceWithActiveMembers extends Equatable {
     return '$activeMembersCount members here';
   }
 
+  /// Returns a formatted description like "3 visits planned"
+  String get upcomingVisitsDescription {
+    if (upcomingVisitCount == 0) return '';
+    if (upcomingVisitCount == 1) return '1 visit planned';
+    return '$upcomingVisitCount visits planned';
+  }
+
   @override
-  List<Object?> get props => [place, activeMembers];
+  List<Object?> get props => [place, activeMembers, upcomingVisitCount];
 }

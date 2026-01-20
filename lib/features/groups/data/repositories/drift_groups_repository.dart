@@ -444,4 +444,40 @@ class DriftGroupsRepository implements IGroupsRepository {
       // Don't rethrow here, we want to show local data even if sync fails
     }
   }
+
+  @override
+  Future<List<Group>> fetchMyGroupsForPlace(
+    String userId,
+    String placeId,
+  ) async {
+    if (_supabaseRepository == null) return [];
+    try {
+      return await _supabaseRepository.fetchMyGroupsForPlace(userId, placeId);
+    } catch (e) {
+      print('Error fetching groups for place: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<void> createPlannedVisitForGroups({
+    required List<String> groupIds,
+    required String placeId,
+    required String userId,
+    required DateTime startTime,
+    required int durationMinutes,
+    String? notes,
+  }) async {
+    if (_supabaseRepository == null) {
+      throw Exception('Online connection required to create planned visit');
+    }
+    await _supabaseRepository.createPlannedVisitForGroups(
+      groupIds: groupIds,
+      placeId: placeId,
+      userId: userId,
+      startTime: startTime,
+      durationMinutes: durationMinutes,
+      notes: notes,
+    );
+  }
 }

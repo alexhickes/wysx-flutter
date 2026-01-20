@@ -136,4 +136,31 @@ class SupabasePlacesRepository {
     if (data.isEmpty) return null;
     return data.first['place_id'] as String?;
   }
+
+  /// Fetch upcoming visit counts for each place
+  /// Returns a map of place_id -> count
+  Future<Map<String, int>> fetchUpcomingVisitCounts(
+    List<String> placeIds,
+  ) async {
+    if (placeIds.isEmpty) return {};
+
+    // We can't easily do a "count group by" in one simple Supabase call without a view or RPC.
+    // For now, let's fetch minimal data (just ID and place_id) filtering by date.
+    // Optimization: create an RPC or view for this.
+    final response = await _client
+        .from('planned_visits')
+        .select('place_id')
+        .inFilter('place_id', placeIds)
+        .gte('planned_at', DateTime.now().toIso8601String());
+
+    final data = List<Map<String, dynamic>>.from(response as List);
+    final Map<String, int> counts = {};
+
+    for (final row in data) {
+      final placeId = row['place_id'] as String;
+      counts[placeId] = (counts[placeId] ?? 0) + 1;
+    }
+
+    return counts;
+  }
 }

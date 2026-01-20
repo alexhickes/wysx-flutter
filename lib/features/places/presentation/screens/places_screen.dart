@@ -104,13 +104,28 @@ class _MyPlacesTab extends ConsumerWidget {
               title: Text(place.name),
               subtitle: activeMembers.isNotEmpty
                   ? Text(
-                      placeWithMembers.activityDescription,
+                      [
+                        placeWithMembers.activityDescription,
+                        if (placeWithMembers.upcomingVisitCount > 0)
+                          placeWithMembers.upcomingVisitsDescription,
+                      ].join(' • '),
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.w500,
                       ),
                     )
-                  : Text(place.description ?? ''),
+                  : Text(
+                      [
+                        if (place.description != null) place.description!,
+                        if (placeWithMembers.upcomingVisitCount > 0)
+                          placeWithMembers.upcomingVisitsDescription,
+                      ].join(' • '),
+                      style: TextStyle(
+                        color: placeWithMembers.upcomingVisitCount > 0
+                            ? Theme.of(context).colorScheme.primary
+                            : null,
+                      ),
+                    ),
               onTap: () {
                 print('DEBUG: Tapped My Place: ${place.name} (${place.id})');
                 context.push('/places/${place.id}');
@@ -159,13 +174,28 @@ class _InvitedPlacesTab extends ConsumerWidget {
               title: Text(place.name),
               subtitle: activeMembers.isNotEmpty
                   ? Text(
-                      placeWithMembers.activityDescription,
+                      [
+                        placeWithMembers.activityDescription,
+                        if (placeWithMembers.upcomingVisitCount > 0)
+                          placeWithMembers.upcomingVisitsDescription,
+                      ].join(' • '),
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.w500,
                       ),
                     )
-                  : Text(place.description ?? ''),
+                  : Text(
+                      [
+                        if (place.description != null) place.description!,
+                        if (placeWithMembers.upcomingVisitCount > 0)
+                          placeWithMembers.upcomingVisitsDescription,
+                      ].join(' • '),
+                      style: TextStyle(
+                        color: placeWithMembers.upcomingVisitCount > 0
+                            ? Theme.of(context).colorScheme.primary
+                            : null,
+                      ),
+                    ),
               trailing: const Chip(label: Text('Invited')),
               onTap: () {
                 print(

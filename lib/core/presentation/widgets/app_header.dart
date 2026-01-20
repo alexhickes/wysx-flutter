@@ -66,16 +66,7 @@ class AppHeader extends ConsumerWidget implements PreferredSizeWidget {
                       ],
                     ),
                   ),
-                  const PopupMenuItem(
-                    value: 'gps',
-                    child: Row(
-                      children: [
-                        Icon(Icons.location_on, size: 20),
-                        SizedBox(width: 12),
-                        Text('GPS Settings'),
-                      ],
-                    ),
-                  ),
+
                   const PopupMenuItem(
                     value: 'logout',
                     child: Row(

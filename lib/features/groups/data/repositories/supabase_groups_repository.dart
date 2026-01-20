@@ -250,6 +250,26 @@ class SupabaseGroupsRepository {
     required int durationMinutes,
     String? notes,
   }) async {
+    await createPlannedVisitForGroups(
+      groupIds: [groupId],
+      placeId: placeId,
+      userId: userId,
+      startTime: startTime,
+      durationMinutes: durationMinutes,
+      notes: notes,
+    );
+  }
+
+  Future<void> createPlannedVisitForGroups({
+    required List<String> groupIds,
+    required String placeId,
+    required String userId,
+    required DateTime startTime,
+    required int durationMinutes,
+    String? notes,
+  }) async {
+    if (groupIds.isEmpty) return;
+
     // 1. Insert into planned_visits
     final visitResponse = await _client
         .from('planned_visits')
@@ -265,11 +285,12 @@ class SupabaseGroupsRepository {
 
     final visitId = visitResponse['id'];
 
-    // 2. Link to group in planned_visit_groups
-    await _client.from('planned_visit_groups').insert({
-      'planned_visit_id': visitId,
-      'group_id': groupId,
-    });
+    // 2. Link to groups in planned_visit_groups
+    final groupLinks = groupIds.map((groupId) {
+      return {'planned_visit_id': visitId, 'group_id': groupId};
+    }).toList();
+
+    await _client.from('planned_visit_groups').insert(groupLinks);
   }
 
   Future<List<Map<String, dynamic>>> fetchPlannedVisits(String groupId) async {
@@ -364,5 +385,36 @@ class SupabaseGroupsRepository {
         .order('planned_at', ascending: true);
 
     return List<Map<String, dynamic>>.from(response);
+  }
+
+  /// Fetches groups where the current user is a member AND the group has the specified place
+  Future<List<Group>> fetchMyGroupsForPlace(
+    String userId,
+    String placeId,
+  ) async {
+    // Fetch groups that satisfy two conditions:
+    // 1. User is a member (via group_members!inner)
+    // 2. Group has the place (via group_places!inner)
+    final response = await _client
+        .from('groups')
+        .select('*, group_members!inner(user_id), group_places!inner(place_id)')
+        .eq('group_members.user_id', userId)
+        .eq('group_places.place_id', placeId);
+
+    final data = response as List<dynamic>;
+
+    return data.map((json) {
+      return Group(
+        id: json['id'],
+        name: json['name'],
+        description: json['description'],
+        createdBy: json['created_by'],
+        createdAt: DateTime.parse(json['created_at']),
+        isPublic: json['is_public'] ?? false,
+        requiresApproval: json['requires_approval'] ?? false,
+        autoCheckinEnabled: json['auto_checkin_enabled'] ?? false,
+        notificationEnabled: json['notification_enabled'] ?? true,
+      );
+    }).toList();
   }
 }

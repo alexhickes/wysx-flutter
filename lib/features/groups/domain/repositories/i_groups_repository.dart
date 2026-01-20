@@ -38,4 +38,14 @@ abstract class IGroupsRepository {
     String? description,
     List<String>? placeType,
   });
+
+  Future<List<Group>> fetchMyGroupsForPlace(String userId, String placeId);
+  Future<void> createPlannedVisitForGroups({
+    required List<String> groupIds,
+    required String placeId,
+    required String userId,
+    required DateTime startTime,
+    required int durationMinutes,
+    String? notes,
+  });
 }
