@@ -1,0 +1,21 @@
+# Placeholder for GoogleService-Info.plist
+
+This file should be downloaded from your Firebase Console after setting up your iOS app.
+
+## How to get this file:
+
+1. Go to [Firebase Console](https://console.firebase.google.com/)
+2. Select your project
+3. Click on the iOS icon or go to Project Settings
+4. Under "Your apps", find your iOS app
+5. Click "Download GoogleService-Info.plist"
+6. Replace this file with the downloaded `GoogleService-Info.plist`
+7. Add the file to your Xcode project (drag into Runner folder in Xcode)
+
+## Important:
+- This file contains your Firebase configuration for iOS
+- Do NOT commit the actual `GoogleService-Info.plist` to version control if it contains sensitive data
+- Add `GoogleService-Info.plist` to your `.gitignore` if needed
+- You must also configure APNs (Apple Push Notification service) in Firebase Console
+
+For detailed instructions, see: `firebase_setup_guide.md`

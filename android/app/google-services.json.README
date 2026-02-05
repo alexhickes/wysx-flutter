@@ -1,0 +1,19 @@
+# Placeholder for google-services.json
+
+This file should be downloaded from your Firebase Console after setting up your Android app.
+
+## How to get this file:
+
+1. Go to [Firebase Console](https://console.firebase.google.com/)
+2. Select your project
+3. Click on the Android icon or go to Project Settings
+4. Under "Your apps", find your Android app
+5. Click "Download google-services.json"
+6. Replace this file with the downloaded `google-services.json`
+
+## Important:
+- This file contains your Firebase configuration for Android
+- Do NOT commit the actual `google-services.json` to version control if it contains sensitive data
+- Add `google-services.json` to your `.gitignore` if needed
+
+For detailed instructions, see: `firebase_setup_guide.md`

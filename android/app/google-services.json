@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "553958928686",
+    "project_id": "wysx-notifications",
+    "storage_bucket": "wysx-notifications.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:553958928686:android:4474a1f1db622bc2ae4abf",
+        "android_client_info": {
+          "package_name": "com.wysx.wysx"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCC1PNhZqrMGwbASRX-KvR-fQbibG6QTCs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

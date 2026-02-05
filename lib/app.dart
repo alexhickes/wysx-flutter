@@ -6,14 +6,48 @@ import 'core/providers/location_provider.dart';
 
 import 'features/settings/presentation/providers/settings_providers.dart';
 import 'features/places/presentation/providers/check_in_manager.dart';
+import 'features/notifications/presentation/providers/fcm_providers.dart';
+import 'features/notifications/presentation/handlers/notification_handler.dart';
 
-class WysxApp extends ConsumerWidget {
+class WysxApp extends ConsumerStatefulWidget {
   const WysxApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<WysxApp> createState() => _WysxAppState();
+}
+
+class _WysxAppState extends ConsumerState<WysxApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    _setupNotificationHandlers();
+  }
+
+  void _setupNotificationHandlers() {
+    final notificationService = ref.read(notificationServiceProvider);
+
+    // Set up notification tap handlers
+    notificationService.onMessageReceived = (message) {
+      debugPrint('📨 Foreground notification received in app');
+    };
+
+    notificationService.onMessageOpenedApp = (message) {
+      debugPrint('📬 Notification opened app');
+      final handler = ref.read(notificationHandlerProvider);
+      handler.handleNotificationTap(message);
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // Initialize CheckInManager globally to monitor location changes
     ref.watch(checkInManagerProvider);
+
+    // Sync FCM token with Supabase when user is authenticated
+    ref.watch(fcmTokenSyncProvider);
+
+    // Set up token refresh listener
+    ref.watch(fcmTokenRefreshListenerProvider);
 
     final router = ref.watch(goRouterProvider);
     final themeMode = ref.watch(themeModeProvider);
