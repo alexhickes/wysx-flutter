@@ -51,8 +51,8 @@ class DefaultFirebaseOptions {
   // TODO: Replace with your actual Firebase configuration
   // You can get these values from Firebase Console or by running `flutterfire configure`
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'YOUR_WEB_API_KEY',
-    appId: 'YOUR_WEB_APP_ID',
+    apiKey: String.fromEnvironment('FIREBASE_API_KEY_WEB'),
+    appId: String.fromEnvironment('FIREBASE_APP_ID_WEB'),
     messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
     projectId: 'YOUR_PROJECT_ID',
     authDomain: 'YOUR_PROJECT_ID.firebaseapp.com',
@@ -60,16 +60,16 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: '...',
-    appId: '...',
+    apiKey: String.fromEnvironment('FIREBASE_API_KEY_ANDROID'),
+    appId: String.fromEnvironment('FIREBASE_APP_ID_ANDROID'),
     messagingSenderId: '553958928686',
     projectId: 'wysx-notifications',
     storageBucket: 'wysx-notifications.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: '...',
-    appId: '...',
+    apiKey: String.fromEnvironment('FIREBASE_API_KEY_IOS'),
+    appId: String.fromEnvironment('FIREBASE_APP_ID_IOS'),
     messagingSenderId: '553958928686',
     projectId: 'wysx-notifications',
     storageBucket: 'wysx-notifications.firebasestorage.app',
