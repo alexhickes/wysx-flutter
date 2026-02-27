@@ -60,16 +60,16 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCC1PNhZqrMGwbASRX-KvR-fQbibG6QTCs',
-    appId: '1:553958928686:android:4474a1f1db622bc2ae4abf',
+    apiKey: '...',
+    appId: '...',
     messagingSenderId: '553958928686',
     projectId: 'wysx-notifications',
     storageBucket: 'wysx-notifications.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCUtY3VxZyOBNSymTJcW61PcWKWMRzsui4',
-    appId: '1:553958928686:ios:2369e1602fdc159bae4abf',
+    apiKey: '...',
+    appId: '...',
     messagingSenderId: '553958928686',
     projectId: 'wysx-notifications',
     storageBucket: 'wysx-notifications.firebasestorage.app',
